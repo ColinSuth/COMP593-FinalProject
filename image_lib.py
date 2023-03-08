@@ -1,9 +1,13 @@
+import requests
+import os
 '''
 Library of useful functions for working with images.
 '''
 def main():
     # TODO: Add code to test the functions in this module
-    return
+    image_url = 'https://i.pinimg.com/736x/05/41/e3/0541e397c1e2ac44229242b13f933e28.jpg'
+    image_data = download_image(image_url)
+    success = save_image_file(image_data, r'C:\temp\kitty.jpg')
 
 def download_image(image_url):
     """Downloads an image from a specified URL.
@@ -17,7 +21,16 @@ def download_image(image_url):
         bytes: Binary image data, if succcessful. None, if unsuccessful.
     """
     # TODO: Complete function body
-    return
+    resp_msg = requests.get(image_url)
+    print(f'Downloading image from {image_url}...', end='')
+    if resp_msg.status_code == requests.codes.ok:
+        file_content = resp_msg.content
+        print('success')
+        return file_content
+    else:
+        print('Error: Invalid url')
+        return None
+        
 
 def save_image_file(image_data, image_path):
     """Saves image data as a file on disk.
@@ -29,11 +42,16 @@ def save_image_file(image_data, image_path):
         image_path (str): Path to save image file
 
     Returns:
-        bytes: True, if succcessful. False, if unsuccessful
+        bool: True, if succcessful. False, if unsuccessful
     """
     # TODO: Complete function body
-    return
-
+    try:
+        with open(image_path, 'wb') as file:
+            file.write(image_data)
+        return True
+    except:
+        return False
+    
 def set_desktop_background_image(image_path):
     """Sets the desktop background image to a specific image.
 
