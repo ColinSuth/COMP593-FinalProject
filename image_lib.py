@@ -1,13 +1,15 @@
 import requests
 import os
+import ctypes
 '''
 Library of useful functions for working with images.
 '''
 def main():
     # TODO: Add code to test the functions in this module
-    image_url = 'https://i.pinimg.com/736x/05/41/e3/0541e397c1e2ac44229242b13f933e28.jpg'
+    image_url = 'https://www.boredpanda.com/blog/wp-content/uploads/2021/08/Meet-MeonJi-the-black-cat-that-is-the-instagram-sensation-6124b0458c8f5__700.jpg'
     image_data = download_image(image_url)
     success = save_image_file(image_data, r'C:\temp\kitty.jpg')
+    set_desktop_background_image(success)
 
 def download_image(image_url):
     """Downloads an image from a specified URL.
@@ -48,7 +50,7 @@ def save_image_file(image_data, image_path):
     try:
         with open(image_path, 'wb') as file:
             file.write(image_data)
-        return True
+        return image_path, True
     except:
         return False
     
@@ -62,7 +64,13 @@ def set_desktop_background_image(image_path):
         bytes: True, if succcessful. False, if unsuccessful        
     """
     # TODO: Complete function body
-    return
+    path = image_path[0]
+    if os.path.isfile(path):
+        ctypes.windll.user32.SystemParametersInfoW(20, 0, path, 0)
+        return True
+    else:
+        print('Error setting the background')
+        return False
 
 def scale_image(image_size, max_size=(800, 600)):
     """Calculates the dimensions of an image scaled to a maximum width

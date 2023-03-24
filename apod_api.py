@@ -1,6 +1,9 @@
+import requests
 '''
 Library for interacting with NASA's Astronomy Picture of the Day API.
 '''
+APOD_URL = f'https://api.nasa.gov/planetary/apod?api_key=DEMO_KEY&start_date=1995-06-16&end_date&thumbs=True'
+resp_msg = requests.get(APOD_URL)
 
 def main():
     # TODO: Add code to test the functions in this module
