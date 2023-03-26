@@ -15,6 +15,9 @@ from datetime import date
 import os
 import image_lib
 import inspect
+from sys import argv, exit
+from apod_api import get_apod_info, get_apod_image_url
+from image_lib import download_image, save_image_file, set_desktop_background_image
 
 # Global variables
 image_cache_dir = None  # Full path of image cache directory
@@ -25,19 +28,19 @@ def main():
     # Get the APOD date from the command line
     apod_date = get_apod_date()    
 
-    # Get the path of the directory in which this script resides
+    # # Get the path of the directory in which this script resides
     script_dir = get_script_dir()
 
-    # Initialize the image cache
+    # # Initialize the image cache
     init_apod_cache(script_dir)
 
-    # Add the APOD for the specified date to the cache
+    # # Add the APOD for the specified date to the cache
     apod_id = add_apod_to_cache(apod_date)
 
-    # Get the information for the APOD from the DB
+    # # Get the information for the APOD from the DB
     apod_info = get_apod_info(apod_id)
 
-    # Set the APOD as the desktop background image
+    # # Set the APOD as the desktop background image
     if apod_id != 0:
         image_lib.set_desktop_background_image(apod_info['file_path'])
 
@@ -53,8 +56,31 @@ def get_apod_date():
         date: APOD date
     """
     # TODO: Complete function body
-    apod_date = date.fromisoformat('2022-12-25')
-    return apod_date
+    if len(argv) == 1:
+        today = date.today()
+        return today
+    
+    elif len(argv) == 2:
+        try: 
+            time = argv[1]
+            apod_date = date.fromisoformat(time)
+        except Exception:
+            print('Invalid parameter')
+            exit()
+
+        lower = date(1995, 6, 16)
+        if apod_date < lower:
+            print('Date is too far in the past')
+            exit()
+        elif apod_date > date.today():
+            print('Date is in the future')
+            exit()
+        else:
+            return apod_date
+        
+    else:
+        exit
+    
 
 def get_script_dir():
     """Determines the path of the directory in which this script resides
