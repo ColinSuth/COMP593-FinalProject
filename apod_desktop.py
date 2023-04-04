@@ -114,7 +114,7 @@ def init_apod_cache(parent_dir):
     if os.path.isdir(image_cache_dir):
         print('Image cache directory already exists.')
     else:
-        os.makedirs(image_cache_dir)
+        os.mkdir(image_cache_dir)
 
     # TODO: Determine the path of image cache DB
     image_cache_db = os.path.join(image_cache_dir, 'image_cache.db')
@@ -125,8 +125,8 @@ def init_apod_cache(parent_dir):
     else:
         con = sqlite3.connect(image_cache_db)
         cur = con.cursor()
-        create_image_cache_table_query="""
-            CREATE TABLE IN NOT EXISTS image_cache
+        create_image_cache_tbl_query="""
+            CREATE TABLE IF NOT EXISTS image_cache
             (
                 id              INTEGER PRIMARY KEY,
                 title           TEXT NOT NULL,
@@ -135,7 +135,7 @@ def init_apod_cache(parent_dir):
                 hash            TEXT NOT NULL
             );
         """
-        cur.execute(create_image_cache_table_query)
+        cur.execute(create_image_cache_tbl_query)
         con.commit()
         con.close()
         print('Image cache DB created.')
