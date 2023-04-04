@@ -11,6 +11,7 @@ Usage:
 Parameters:
   apod_date = APOD date (format: YYYY-MM-DD)
 """
+import sqlite3
 from datetime import date
 import os
 import image_lib
@@ -107,9 +108,38 @@ def init_apod_cache(parent_dir):
     global image_cache_dir
     global image_cache_db
     # TODO: Determine the path of the image cache directory
+    image_cache_dir = os.path.join(parent_dir, 'image_cache')
+    print(f'Image cache directory: {image_cache_dir}')
     # TODO: Create the image cache directory if it does not already exist
+    if os.path.isdir(image_cache_dir):
+        print('Image cache directory already exists.')
+    else:
+        os.makedirs(image_cache_dir)
+
     # TODO: Determine the path of image cache DB
+    image_cache_db = os.path.join(image_cache_dir, 'image_cache.db')
+    print(f'Image cache DB: {image_cache_db}')
     # TODO: Create the DB if it does not already exist
+    if os.path.isfile(image_cache_db):
+        print('Image cache DB already exists.')
+    else:
+        con = sqlite3.connect(image_cache_db)
+        cur = con.cursor()
+        create_image_cache_table_query="""
+            CREATE TABLE IN NOT EXISTS image_cache
+            (
+                id              INTEGER PRIMARY KEY,
+                title           TEXT NOT NULL,
+                explanation     TEXT NOT NULL,
+                path            TEXT NOT NULL,
+                hash            TEXT NOT NULL
+            );
+        """
+        cur.execute(create_image_cache_table_query)
+        con.commit()
+        con.close()
+        print('Image cache DB created.')
+
 
 def add_apod_to_cache(apod_date):
     """Adds the APOD image from a specified date to the image cache.
