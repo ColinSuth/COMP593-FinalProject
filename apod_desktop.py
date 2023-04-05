@@ -198,12 +198,12 @@ def add_apod_to_db(title, explanation, file_path, sha256):
     cur.execute(add_image_cache_query, image_cache)
     con.commit()
     con.close()
-    # if :
-    #     print('success')
-    #     return
-    # else:
-    #     print('failure')
-    #     return 0
+    if :
+        print('success')
+        return
+    else:
+        print('failure')
+        return 0
 
 def get_apod_id_from_db(image_sha256):
     """Gets the record ID of the APOD in the cache having a specified SHA-256 hash value
@@ -217,7 +217,19 @@ def get_apod_id_from_db(image_sha256):
         int: Record ID of the APOD in the image cache DB, if it exists. Zero, if it does not.
     """
     # TODO: Complete function body
-    return 0
+    con = sqlite3.connect(image_cache_db)
+    cur = con.cursor()
+    get_sha256 = f"""
+        SELECT id FROM image_cache
+        WHERE hash={image_sha256}
+    """
+    cur.execute(get_sha256)
+    query_result = cur.fetchall()
+    con.close()
+    if query_result == True:
+        return query_result[1]
+    else:
+        return 0
 
 def determine_apod_file_path(image_title, image_url):
     """Determines the path at which a newly downloaded APOD image must be 
