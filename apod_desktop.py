@@ -125,7 +125,7 @@ def init_apod_cache(parent_dir):
     else:
         con = sqlite3.connect(image_cache_db)
         cur = con.cursor()
-        create_image_cache_tbl_query="""
+        create_image_cache_tbl="""
             CREATE TABLE IF NOT EXISTS image_cache
             (
                 id              INTEGER PRIMARY KEY,
@@ -135,7 +135,7 @@ def init_apod_cache(parent_dir):
                 hash            TEXT NOT NULL
             );
         """
-        cur.execute(create_image_cache_tbl_query)
+        cur.execute(create_image_cache_tbl)
         con.commit()
         con.close()
         print('Image cache DB created.')
@@ -176,7 +176,34 @@ def add_apod_to_db(title, explanation, file_path, sha256):
         int: The ID of the newly inserted APOD record, if successful.  Zero, if unsuccessful       
     """
     # TODO: Complete function body
-    return 0
+    print('Adding APOD to image cache DB...', end='')
+    con = sqlite3.connect(image_cache_db)
+    cur = con.cursor()
+    add_image_cache_query = """
+        INSERT INTO image_cache
+        (
+            title,
+            explanation,
+            path,
+            hash   
+        )
+        VALUES (?, ?, ?, ?);
+    """
+    image_cache = (
+        title,
+        explanation,
+        file_path,
+        sha256
+        )
+    cur.execute(add_image_cache_query, image_cache)
+    con.commit()
+    con.close()
+    # if :
+    #     print('success')
+    #     return
+    # else:
+    #     print('failure')
+    #     return 0
 
 def get_apod_id_from_db(image_sha256):
     """Gets the record ID of the APOD in the cache having a specified SHA-256 hash value
