@@ -16,6 +16,8 @@ from datetime import date
 import os
 import image_lib
 import inspect
+import re
+import urllib.parse
 from sys import argv, exit
 from apod_api import get_apod_info, get_apod_image_url
 from image_lib import download_image, save_image_file, set_desktop_background_image
@@ -195,12 +197,13 @@ def add_apod_to_db(title, explanation, file_path, sha256):
         file_path,
         sha256
         )
-    cur.execute(add_image_cache_query, image_cache)
+    id = cur.execute(add_image_cache_query, image_cache)
     con.commit()
     con.close()
-    if :
+    last_row = id.lastrowid
+    if last_row:
         print('success')
-        return
+        return last_row
     else:
         print('failure')
         return 0
@@ -227,7 +230,7 @@ def get_apod_id_from_db(image_sha256):
     query_result = cur.fetchall()
     con.close()
     if query_result == True:
-        return query_result[1]
+        return query_result[0]
     else:
         return 0
 
@@ -257,7 +260,12 @@ def determine_apod_file_path(image_title, image_url):
         str: Full path at which the APOD image file must be saved in the image cache directory
     """
     # TODO: Complete function body
-    return
+    path = urllib.parse(image_url)
+    ext = os.path.splitext(path)[1]
+    title = re.sub(r'[#:;!@$%^&*()-=+.]', '_', {image_title})
+    file_name = title + ext
+    image_path = f'{image_cache_dir}\\{file_name}'
+    return image_path
 
 def get_apod_info(image_id):
     """Gets the title, explanation, and full path of the APOD having a specified
