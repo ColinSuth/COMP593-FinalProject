@@ -262,7 +262,7 @@ def determine_apod_file_path(image_title, image_url):
     # TODO: Complete function body
     path = urllib.parse(image_url)
     ext = os.path.splitext(path)[1]
-    title = re.sub(r'[#:;!@$%^&*()-=+.]', '_', {image_title})
+    title = re.sub(r'[#:;!@$%^&*()-=+.,/"|{}\'<>?\\\[\]]', '_', {image_title})
     file_name = title + ext
     image_path = f'{image_cache_dir}\\{file_name}'
     return image_path
