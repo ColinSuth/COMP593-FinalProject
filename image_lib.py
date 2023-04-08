@@ -64,8 +64,9 @@ def set_desktop_background_image(image_path):
         bytes: True, if succcessful. False, if unsuccessful        
     """
     # TODO: Complete function body
-    path = image_path[0]
+    path = image_path  # Add this [0] to test the individual function, otherwise remove it
     if os.path.isfile(path):
+        print(f'Setting desktop to {image_path}')
         ctypes.windll.user32.SystemParametersInfoW(20, 0, path, 0)
         return True
     else:

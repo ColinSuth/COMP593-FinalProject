@@ -19,8 +19,9 @@ import inspect
 import re
 import urllib.parse
 from sys import argv, exit
-from apod_api import get_apod_info, get_apod_image_url
-from image_lib import download_image, save_image_file, set_desktop_background_image
+import apod_api
+import image_lib
+import hashlib
 
 # Global variables
 image_cache_dir = None  # Full path of image cache directory
@@ -31,19 +32,19 @@ def main():
     # Get the APOD date from the command line
     apod_date = get_apod_date()    
 
-    # # Get the path of the directory in which this script resides
+    # Get the path of the directory in which this script resides
     script_dir = get_script_dir()
 
-    # # Initialize the image cache
+    # Initialize the image cache
     init_apod_cache(script_dir)
 
-    # # Add the APOD for the specified date to the cache
+    # Add the APOD for the specified date to the cache
     apod_id = add_apod_to_cache(apod_date)
 
-    # # Get the information for the APOD from the DB
+    # Get the information for the APOD from the DB
     apod_info = get_apod_info(apod_id)
 
-    # # Set the APOD as the desktop background image
+    # Set the APOD as the desktop background image
     if apod_id != 0:
         image_lib.set_desktop_background_image(apod_info['file_path'])
 
@@ -158,12 +159,41 @@ def add_apod_to_cache(apod_date):
         cache successfully or if the APOD already exists in the cache. Zero, if unsuccessful.
     """
     print("APOD date:", apod_date.isoformat())
+    
     # TODO: Download the APOD information from the NASA API
+    print(f'Getting {apod_date} APOD information from NASA...', end='')
+    apod_info = apod_api.get_apod_info(apod_date)
+    title = apod_info['title']
+    print(f'APOD title: {title}')
+    apod_url = apod_info['url']
+    print(f'APOD URL: {apod_url}')
+    apod_explanation = apod_info['explanation']
+
     # TODO: Download the APOD image
+    download_apod = image_lib.download_image(apod_url)
+    check_hash = hashlib.sha256(download_apod).hexdigest()
+    print(f'APOD SHA-256: {check_hash}')
+
     # TODO: Check whether the APOD already exists in the image cache
+    check_db = get_apod_id_from_db(check_hash)
+    
+    if check_db != 0:
+        print('APOD image already in cache.')
+        return check_hash
+    else:
+        print('APOD image is not already in cache')
+        path = determine_apod_file_path(title, apod_url)
+        print(f'APOD file path: {path}')
+        save_image = image_lib.save_image_file(download_apod, path)
+        print(f'Saving image file as {save_image}')
+        adding_info = add_apod_to_db(title, apod_explanation, path, check_hash)
+        return adding_info
+
+
     # TODO: Save the APOD file to the image cache directory
     # TODO: Add the APOD information to the DB
-    return 0
+
+    # return 0
 
 def add_apod_to_db(title, explanation, file_path, sha256):
     """Adds specified APOD information to the image cache DB.
@@ -224,7 +254,7 @@ def get_apod_id_from_db(image_sha256):
     cur = con.cursor()
     get_sha256 = f"""
         SELECT id FROM image_cache
-        WHERE hash={image_sha256}
+        WHERE hash='{image_sha256}'
     """
     cur.execute(get_sha256)
     query_result = cur.fetchall()
@@ -260,9 +290,9 @@ def determine_apod_file_path(image_title, image_url):
         str: Full path at which the APOD image file must be saved in the image cache directory
     """
     # TODO: Complete function body
-    path = urllib.parse(image_url)
+    path = urllib.parse.urlsplit(image_url).path
     ext = os.path.splitext(path)[1]
-    title = re.sub(r'[#:;!@$%^&*()-=+.,/"|{}\'<>?\\\[\]]', '_', {image_title})
+    title = re.sub(r'[\s+#:;!@$%^&*()-=+.,/"|{}<>?]', r'_', image_title)
     file_name = title + ext
     image_path = f'{image_cache_dir}\\{file_name}'
     return image_path
@@ -282,16 +312,16 @@ def get_apod_info(image_id):
     cur = con.cursor()
     add_image_cache_query = f"""
     SELECT title, explanation, path FROM image_cache
-    WHERE id={image_id}
+    WHERE id='{image_id}'
     """
     cur.execute(add_image_cache_query)
-    query_result = cur.fetchall()
+    query_result = cur.fetchone()
     con.close()
     # TODO: Put information into a dictionary
     apod_info = {
-        'title': query_result[0][0], 
-        'explanation': query_result[0][1],
-        'file_path': query_result[0][2],
+        'title': query_result[0], 
+        'explanation': query_result[1],
+        'file_path': query_result[2],
     }
     return apod_info
 
