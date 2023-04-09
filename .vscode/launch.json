@@ -11,7 +11,7 @@
             "program": "apod_desktop.py",
             "console": "integratedTerminal",
             "justMyCode": true,
-            "args": "2000-03-15"
+            "args": "2022-01-12"
         }
     ]
 }

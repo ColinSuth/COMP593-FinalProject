@@ -24,8 +24,14 @@ def get_apod_info(apod_date):
     Returns:
         dict: Dictionary of APOD info, if successful. None if unsuccessful
     """
-    pic_url = f'{APOD_URL}?api_key={APOD_KEY}&date={apod_date}&thumbs=True'
-    resp_msg = requests.get(pic_url)
+    # pic_url = f'{APOD_URL}?api_key={APOD_KEY}&date={apod_date}&thumbs=True'
+    pic_url = {
+        'api_key' : APOD_KEY,
+        'date' : apod_date,
+        'thumbs' : True
+    }
+
+    resp_msg = requests.get(APOD_URL, params=pic_url)
     if resp_msg.ok:
         diction = resp_msg.json()
         return diction

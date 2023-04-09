@@ -123,9 +123,7 @@ def init_apod_cache(parent_dir):
     image_cache_db = os.path.join(image_cache_dir, 'image_cache.db')
     print(f'Image cache DB: {image_cache_db}')
     # TODO: Create the DB if it does not already exist
-    if os.path.isfile(image_cache_db):
-        print('Image cache DB already exists.')
-    else:
+    if not os.path.exists(image_cache_db):
         con = sqlite3.connect(image_cache_db)
         cur = con.cursor()
         create_image_cache_tbl="""
@@ -142,6 +140,8 @@ def init_apod_cache(parent_dir):
         con.commit()
         con.close()
         print('Image cache DB created.')
+    else:
+        print('Image cache DB already exists.')
 
 
 def add_apod_to_cache(apod_date):
@@ -163,9 +163,9 @@ def add_apod_to_cache(apod_date):
     # TODO: Download the APOD information from the NASA API
     print(f'Getting {apod_date} APOD information from NASA...', end='')
     apod_info = apod_api.get_apod_info(apod_date)
+    apod_url = apod_api.get_apod_image_url(apod_info)
     title = apod_info['title']
     print(f'APOD title: {title}')
-    apod_url = apod_info['url']
     print(f'APOD URL: {apod_url}')
     apod_explanation = apod_info['explanation']
 
@@ -179,16 +179,17 @@ def add_apod_to_cache(apod_date):
     
     if check_db != 0:
         print('APOD image already in cache.')
-        return check_hash
-    else:
+        return check_db
+    elif check_db == 0:
         print('APOD image is not already in cache')
         path = determine_apod_file_path(title, apod_url)
         print(f'APOD file path: {path}')
         save_image = image_lib.save_image_file(download_apod, path)
-        print(f'Saving image file as {save_image}')
+        print(f'Saving image file as {save_image[1]}')
         adding_info = add_apod_to_db(title, apod_explanation, path, check_hash)
         return adding_info
-
+    else:
+        return 0
 
     # TODO: Save the APOD file to the image cache directory
     # TODO: Add the APOD information to the DB
@@ -259,8 +260,8 @@ def get_apod_id_from_db(image_sha256):
     cur.execute(get_sha256)
     query_result = cur.fetchall()
     con.close()
-    if query_result == True:
-        return query_result[0]
+    if query_result:
+        return query_result[0][0]
     else:
         return 0
 
@@ -292,9 +293,10 @@ def determine_apod_file_path(image_title, image_url):
     # TODO: Complete function body
     path = urllib.parse.urlsplit(image_url).path
     ext = os.path.splitext(path)[1]
-    title = re.sub(r'[\s+#:;!@$%^&*()-=+.,/"|{}<>?]', r'_', image_title)
-    file_name = title + ext
-    image_path = f'{image_cache_dir}\\{file_name}'
+    title = re.sub(r'[\s+\#:;!@\$%\^&\*()\-=\+\.,\/"\|\{\}<>?\[\]\'\"]', r'_', image_title)
+    whole_title = re.sub(r'_+', '_', title)
+    file_name = whole_title + ext
+    image_path = os.path.join(image_cache_dir, file_name)      
     return image_path
 
 def get_apod_info(image_id):
