@@ -8,10 +8,10 @@
             "name": "Python: Current File",
             "type": "python",
             "request": "launch",
-            "program": "apod_desktop.py",
+            "program": "apod_viewer.py",
             "console": "integratedTerminal",
             "justMyCode": true,
-            "args": "2022-01-12"
+            "args": "2022-12-06"
         }
     ]
 }
