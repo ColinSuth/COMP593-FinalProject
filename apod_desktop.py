@@ -68,16 +68,19 @@ def get_apod_date():
         try: 
             time = argv[1]
             apod_date = date.fromisoformat(time)
-        except Exception:
-            print('Invalid parameter')
+        except Exception as error:
+            print(f'Invalid date format: {error}')
+            print('Script execution aborted')
             exit()
 
         lower = date(1995, 6, 16)
         if apod_date < lower:
             print('Date is too far in the past')
+            print('Script execution aborted')
             exit()
         elif apod_date > date.today():
-            print('Date is in the future')
+            print('APOD date cannot be in the futre')
+            print('Script execution aborted')
             exit()
         else:
             return apod_date
