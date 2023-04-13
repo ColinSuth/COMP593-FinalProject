@@ -79,21 +79,17 @@ def handle_img_sel(event):
     image_path = query_result[1]
     explanation = query_result[0]
     
-    
     if image_path is not None:
-        query_result['path'] = image_path
-
+        img_nasa['file'] = image_path
         btn_down.state(['!disabled'])
+
+
 
 nasa_names.bind('<<ComboboxSelected>>', handle_img_sel)
 
 
 lbl_cal = ttk.Label(frm_btm_right, text='Select Date')
 lbl_cal.grid(row=1, column=1, padx=10, pady=10)
-
-
-
-
 
 
 
@@ -113,6 +109,7 @@ def handle_date_sel():
     
 
 def image_change():
+    global image_path
     image_lib.set_desktop_background_image(image_path)
 
 
@@ -124,7 +121,7 @@ btn_date.grid(row=1, column=3, padx=10, pady=10)
 
 
 
-btn_down = ttk.Button(frm_btm_left, text='Set as Desktop', state=DISABLED)
+btn_down = ttk.Button(frm_btm_left, text='Set as Desktop',command=image_change, state=DISABLED)
 btn_down.grid(row=1, column=3, padx=10, pady=10)
 
 
