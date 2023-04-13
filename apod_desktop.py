@@ -69,24 +69,24 @@ def get_apod_date():
             time = argv[1]
             apod_date = date.fromisoformat(time)
         except Exception as error:
-            print(f'Invalid date format: {error}')
+            print(f'Error: Invalid date format: {error}')
             print('Script execution aborted')
             exit()
 
         lower = date(1995, 6, 16)
         if apod_date < lower:
-            print('Date is too far in the past')
+            print('Error: Date is too far in the past')
             print('Script execution aborted')
             exit()
         elif apod_date > date.today():
-            print('APOD date cannot be in the futre')
+            print('Error: APOD date cannot be in the futre')
             print('Script execution aborted')
             exit()
         else:
             return apod_date
         
     else:
-        exit
+        exit()
     
 
 def get_script_dir():
