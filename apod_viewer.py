@@ -9,6 +9,7 @@ import ctypes
 from tkcalendar import Calendar, DateEntry
 from datetime import date, datetime
 import sqlite3
+from PIL import Image, ImageTk
 
 
 # Determine the path and parent directory of this script
@@ -47,11 +48,14 @@ lbl_image.grid(row=1, column=0)
 lbl_cal = ttk.LabelFrame(frm_btm_right, text='Get More Images')
 lbl_cal.grid(row=1, column=1)
 
-
-img_nasa = PhotoImage(file=os.path.join(script_dir, 'logo.png'))
+path = os.path.join(script_dir, 'logo.png')
+logo = Image.open(path)
+img_nasa = ImageTk.PhotoImage(logo)
 lbl_nasa = ttk.Label(frm_top, image=img_nasa)
 lbl_nasa.grid(row=0, column=0, sticky=NSEW)
 
+lbl_explan = ttk.Label(frm_top, text='')
+lbl_explan.grid(row=1, column=0, sticky=NSEW)
 
 
 lbl_title = ttk.Label(frm_btm_left, text='Select image')
@@ -70,18 +74,25 @@ def handle_img_sel(event):
     cur = con.cursor()
     title_query = f"""
     SELECT explanation, path FROM image_cache
-    WHERE title='{user_pick}'
+    WHERE title=?
     """
-    cur.execute(title_query)
+    cur.execute(title_query, (user_pick,))
     query_result = cur.fetchone()
     con.close()
  
     image_path = query_result[1]
     explanation = query_result[0]
     
-    if image_path is not None:
-        img_nasa['file'] = image_path
-        btn_down.state(['!disabled'])
+    with Image.open(path) as img:
+        width, height = img.size
+
+    resize = image_lib.scale_image(width, height)
+
+    thumbnail = Image.thumbnail(resize)
+    new_pic = Image.PhotoImage(thumbnail)
+    lbl_nasa.image(new_pic)
+
+    lbl_explan.text(explanation)
 
 
 
@@ -102,11 +113,27 @@ calen.grid(row=1, column=2, padx=10, pady=10)
 
 def handle_date_sel():
 
+    global image_path
     date_sel = calen.get_date()
     format_date = date_sel.strftime('%Y-%m-%d')
     info = apod_desktop.add_apod_to_cache(format_date)
-    apod_dict = apod_desktop.get_apod_info(info)
-    
+    apod_info = apod_desktop.get_apod_info(info)
+    title = apod_info['title']
+    explanation = apod_info['explanation']
+    image_path = apod_info['file_path']
+    desktop_names_list.append(title)
+
+    with Image.open(image_path) as img:
+        width, height = img.size
+
+    resize = image_lib.scale_image(width, height)
+
+    thumbnail = Image.thumbnail(resize)
+    new_pic = Image.PhotoImage(thumbnail)
+    lbl_nasa.image(new_pic)
+
+    lbl_explan.text(explanation)
+
 
 def image_change():
     global image_path
@@ -121,7 +148,7 @@ btn_date.grid(row=1, column=3, padx=10, pady=10)
 
 
 
-btn_down = ttk.Button(frm_btm_left, text='Set as Desktop',command=image_change, state=DISABLED)
+btn_down = ttk.Button(frm_btm_left, text='Set as Desktop',command=image_change)
 btn_down.grid(row=1, column=3, padx=10, pady=10)
 
 
