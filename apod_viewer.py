@@ -22,6 +22,7 @@ apod_desktop.init_apod_cache(script_dir)
 # TODO: Create the GUI
 root = Tk()
 root.geometry('900x700')
+root.minsize(900, 700)
 root.title("NASA APOD Viewer")
 root.resizable(True, True)
 root.rowconfigure(0, weight=75)
@@ -64,7 +65,7 @@ lbl_nasa.grid(row=0, column=0)
 
 
 
-lbl_explan = ttk.Label(frm_top, text='', wraplength=600,anchor=N)
+lbl_explan = ttk.Label(frm_top, text='', wraplength=600, anchor=N)
 lbl_explan.grid(row=1, column=0)
 
 lbl_title = ttk.Label(frm_btm_left, text='Select image')
